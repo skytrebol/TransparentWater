@@ -22,10 +22,10 @@ import {
  * Work based on :
  * http://slayvin.net : Flat mirror for three.js
  * http://www.adelphi.edu/~stemkoski : An implementation of water shader based on the flat mirror
- * http://29a.ch/ && http://29a.ch/slides/2012/webglwater/ : Water shader explanations in WebGL
+ * http://29a.ch/ && http://29a.ch/slides/2012/webglwater/ : TransparentWater shader explanations in WebGL
  */
 
-var Water = function ( geometry, options ) {
+var TransparentWater = function ( geometry, options ) {
 
 	Mesh.call( this, geometry );
 
@@ -322,7 +322,7 @@ var Water = function ( geometry, options ) {
 
 		if ( renderer.outputEncoding !== LinearEncoding ) {
 
-			console.warn( 'THREE.Water: WebGLRenderer must use LinearEncoding as outputEncoding.' );
+			console.warn( 'THREE.TransparentWater: WebGLRenderer must use LinearEncoding as outputEncoding.' );
 			scope.onBeforeRender = function () {};
 
 			return;
@@ -331,7 +331,7 @@ var Water = function ( geometry, options ) {
 
 		if ( renderer.toneMapping !== NoToneMapping ) {
 
-			console.warn( 'THREE.Water: WebGLRenderer must use NoToneMapping as toneMapping.' );
+			console.warn( 'THREE.TransparentWater: WebGLRenderer must use NoToneMapping as toneMapping.' );
 			scope.onBeforeRender = function () {};
 
 			return;
@@ -376,7 +376,24 @@ var Water = function ( geometry, options ) {
 	};
 };
 
-Water.prototype = Object.create( Mesh.prototype );
-Water.prototype.constructor = Water;
+TransparentWater.prototype = Object.create( Mesh.prototype );
+TransparentWater.prototype.constructor = TransparentWater;
+TransparentWater.prototype.update = function(_params){
+    let _this = this;
+    Object.keys(_params).forEach(function (_key) {
+	if( _this.material.uniforms[ _key ] ){
+	    if( _key == 'sunColor'  || 
+		_key == 'baseColor' || 
+		_key == 'waterColor' ){
+		_this.material.uniforms[ _key ].value = new THREE.Color( _params[ _key ] );
+	    }else if(_key == 'time'){
+		//_this.material.uniforms[ 'time' ].value += 1.0 / 60.0;
+		_this.material.uniforms[ 'time' ].value += _params[ _key ];
+	    }else{
+		_this.material.uniforms[ _key ].value = _params[ _key ];
+	    }
+	}
+    });
+}
 
-export { Water };
+export { TransparentWater };
